@@ -1,6 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { FC, useState } from 'react';
-import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 import {
   RecoilRoot,
@@ -31,26 +41,132 @@ type Todo = {
   isComplete: boolean,
 };
 
+type Filter = 'all' | 'completed' | 'uncompleted';
+
 const defaultTodoList: Todo[] = [
   { id: getId(), text: 'Todo 1', isComplete: true },
   { id: getId(), text: 'Todo 2', isComplete: false },
-]
+  { id: getId(), text: 'Todo 3', isComplete: true },
+  { id: getId(), text: 'Todo 4', isComplete: false },
+  { id: getId(), text: 'Todo 5', isComplete: true },
+  { id: getId(), text: 'Todo 6', isComplete: false },
+  { id: getId(), text: 'Todo 7', isComplete: true },
+  { id: getId(), text: 'Todo 8', isComplete: false },
+  { id: getId(), text: 'Todo 9', isComplete: true },
+  { id: getId(), text: 'Todo 10', isComplete: false },
+];
 
 const todoListState = atom<Todo[]>({
   key: 'todoListState',
-  default: [],
+  default: defaultTodoList,
 });
 
+const todoListFilterState = atom<Filter>({
+  key: 'todoListFilterState',
+  default: 'all',
+});
+
+const filteredTodoListState = selector({
+  key: 'filteredTodoListState',
+  get: ({get}) => {
+    const filter = get(todoListFilterState);
+    const list = get(todoListState);
+
+    switch(filter) {
+      case 'completed':
+        return list.filter((item) => item.isComplete);
+      case 'uncompleted':
+        return list.filter((item) => !item.isComplete);
+      default:
+        return list;
+    }
+  }
+});
+
+const todoListStatsState = selector({
+  key: 'todoListStatsState',
+  get: ({get}) => {
+    const todoList = get(todoListState);
+    const totalNum = todoList.length;
+    const totalCompletedNum = todoList.filter((item) => item.isComplete).length;
+    const totalCUncompletedNum = todoList.filter((item) => !item.isComplete).length;
+    const percentCompleted = totalNum === 0 ? totalNum : totalCompletedNum / totalNum;
+
+    return {
+      totalNum,
+      totalCompletedNum,
+      totalCUncompletedNum,
+      percentCompleted,
+    }
+  },
+});
+
+const TodoListFilters: FC = (props) => {
+  const [filter, setFilter] = useRecoilState(todoListFilterState);
+
+  const updateFilter = (filter: Filter) => {
+    setFilter(filter);
+  };
+
+  const styles = TodoListFiltersStyles;
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={() => updateFilter('all')} style={styles.button}>
+        {filter === 'all' && <MaterialIcons name="check" style={styles.icon} />}
+        <Text style={styles.text}>All</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => updateFilter('completed')} style={styles.button}>
+        {filter === 'completed' && <MaterialIcons name="check" style={styles.icon} />}
+        <Text style={styles.text}>Completed</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => updateFilter('uncompleted')} style={styles.button}>
+        {filter === 'uncompleted' && <MaterialIcons name="check" style={styles.icon} />}
+        <Text style={styles.text}>Uncompleted</Text>
+      </TouchableOpacity>
+    </View>
+  )
+};
+
+const TodoListStats: FC = (props) => {
+  const {
+    totalNum,
+    totalCompletedNum,
+    totalCUncompletedNum,
+    percentCompleted,
+  } = useRecoilValue(todoListStatsState);
+
+  const formattedPercentCompleted = Math.round(percentCompleted * 100);
+
+  return (
+    <View style={{padding: 8}}>
+      <View>
+        <Text>Total items: {totalNum}</Text>
+      </View>
+      <View>
+        <Text>Items completed: {totalCompletedNum}</Text>
+      </View>
+      <View>
+        <Text>Items not completed: {totalCUncompletedNum}</Text>
+      </View>
+      <View>
+        <Text>Percent completed: {formattedPercentCompleted}%</Text>
+      </View>
+    </View>
+  )
+}
+
 const TodoList: FC = (props) => {
-  const todoList = useRecoilValue(todoListState);
+  const todoList = useRecoilValue(filteredTodoListState);
   return (
     <>
-      {/* <TodoListStats /> */}
-      {/* <TodoListFilters /> */}
       <TodoItemCreator />
+      <TodoListFilters />
+      <ScrollView style={{flex: 1}}>
       {todoList.map(todoItem => 
         <TodoItem key={todoItem.id} item={todoItem} />
       )}
+      </ScrollView>
+      <TodoListStats />
     </>
   );
 };
@@ -69,26 +185,7 @@ const TodoItemCreator: FC = (props) => {
     setInputValue(text);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      backgroundColor: '#75a6ff',
-      padding: 16,
-    },
-    inputContainer: {
-      flex: 1,
-      backgroundColor: '#F8F8F8',
-      borderRadius: 8,
-      padding: 8,
-    },
-    buttonContainer: {
-      marginLeft: 16,
-      backgroundColor: '#3578e5',
-      borderRadius: 8,
-      padding: 8,
-    },
-  });
-
+  const styles = TodoItemCreatorStyles;
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -122,27 +219,7 @@ const TodoItem: FC<{item: Todo}> = ({item}) => {
     setTodoList(newList);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      padding: 16,
-      borderBottomColor: '#DDD',
-      borderBottomWidth: StyleSheet.hairlineWidth,
-    },
-    inputContainer: {
-      flex: 1,
-      backgroundColor: '#F8F8F8',
-      borderRadius: 8,
-      padding: 8,
-    },
-    buttonContainer: {
-      marginLeft: 16,
-      backgroundColor: '#3578e5',
-      borderRadius: 8,
-      padding: 8,
-    },
-  });
-
+  const styles = TodoItemStyles;
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -164,7 +241,6 @@ export default function App() {
       flex: 1,
       padding: 16,
       backgroundColor: '#fff',
-      alignItems: 'center',
     },
   });
 
@@ -177,3 +253,73 @@ export default function App() {
     </RecoilRoot>
   );
 };
+
+
+const TodoItemStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomColor: '#DDD',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  inputContainer: {
+    flex: 1,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 8,
+    padding: 8,
+  },
+  buttonContainer: {
+    marginLeft: 16,
+    backgroundColor: '#3578e5',
+    borderRadius: 8,
+    padding: 8,
+  },
+});
+
+const TodoItemCreatorStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    backgroundColor: '#75a6ff',
+    padding: 16,
+  },
+  inputContainer: {
+    flex: 1,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 8,
+    padding: 8,
+  },
+  buttonContainer: {
+    marginLeft: 16,
+    backgroundColor: '#3578e5',
+    borderRadius: 8,
+    padding: 8,
+  },
+});
+
+const TodoListFiltersStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    alignContent: 'flex-start',
+    padding: 8,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#3578e5',
+    borderRadius: 8,
+  },
+  icon: {
+    color: '#00C851',
+    fontSize: 16,
+  },
+  text: {
+    color: '#222222',
+    fontSize: 16,
+  }
+});

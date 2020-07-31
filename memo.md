@@ -31,3 +31,24 @@
 
 - `eslint-plugin-react-hooks `
   - Add `useRecoilCallback` as additionalHooks
+
+
+## 2020.07.31
+
+[Selectorのチュートリアル](https://recoiljs.org/docs/basic-tutorial/selectors)
+
+- 別のステートに依存するようなステートの書き方
+  - TodoリストとフィルタのステートからフィルタされたTodoリストを派生
+  - Todoリストからステータスを算出したステートを派生
+
+```
+filteredTodoListState(Selector)
+ ┗ todoListState(Atom)
+ ┗ todoListFilterState(Atom)
+
+todoListStatsState(Selector)
+ ┗ TodoListState(Atom)
+```
+
+Reduxだとreducerや個々のconnect、component内でselectorの役割を担う？  
+Selectorという単位でロジックがまとまっていてステートをどのように扱いたいかがわかりやすい気がする。
