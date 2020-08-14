@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { FC, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AsyncTest, ErrorBoundary } from './AyncTest';
 
 import {
   SafeAreaView,
@@ -18,7 +19,7 @@ import {
   selector,
   useRecoilState,
   useRecoilValue,
-  useSetRecoilState
+  useSetRecoilState,
 } from 'recoil';
 
 // utility for creating unique Id
@@ -247,8 +248,13 @@ export default function App() {
   return (
     <RecoilRoot>
       <SafeAreaView style={styles.container}>
-        <TodoList />
-        <StatusBar style="auto" />
+        {/* <TodoList />
+        <StatusBar style="auto" /> */}
+        <ErrorBoundary>
+          <React.Suspense fallback={<View><Text>Loading...</Text></View>}>
+            <AsyncTest />
+          </React.Suspense>
+        </ErrorBoundary>
       </SafeAreaView>
     </RecoilRoot>
   );

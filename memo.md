@@ -52,3 +52,16 @@ todoListStatsState(Selector)
 
 Reduxだとreducerや個々のconnect、component内でselectorの役割を担う？  
 Selectorという単位でロジックがまとまっていてステートをどのように扱いたいかがわかりやすい気がする。
+
+
+## 2020.08.14
+
+[asynchronous-data-queries](https://recoiljs.org/docs/guides/asynchronous-data-queries)
+
+>Recoil allows you to seamlessly mix synchronous and asynchronous functions in your data-flow graph of selectors.  
+>Simply return a Promise to a value instead of the value itself from a selector get callback, the interface remains exactly the same.
+
+- SelectorのgetコールバックでPromiseを返すだけ
+- Selectorを利用する側は特に考慮する必要なし
+- Promiseが解決されるまでの表示は`React.Suspense`でハンドルできる
+- エラーのハンドルは`ErrorBoundary`でハンドル
