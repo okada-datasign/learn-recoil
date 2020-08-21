@@ -65,3 +65,23 @@ Selectorという単位でロジックがまとまっていてステートをど
 - Selectorを利用する側は特に考慮する必要なし
 - Promiseが解決されるまでの表示は`React.Suspense`でハンドルできる
 - エラーのハンドルは`ErrorBoundary`でハンドル
+
+## 2020.08.21
+
+### [React.Suspense](https://reactjs.org/docs/concurrent-mode-suspense.html)
+
+- React 16.6で追加
+- Experimental
+- Stableな実装は[ここ](https://www.robinwieruch.de/react-hooks-fetch-data)を参照
+  - useEffect内で非同期関数を実行
+  - 実行結果をステートに反映
+- 宣言的にローディング状態を指定するもの
+- fetch等のAPIを置き換えるものではない
+- データフェッチングライブラリに統合させることができる
+- 非同期処理を同期的に扱っていると感じる
+- [Concurrent Mode](https://reactjs.org/docs/concurrent-mode-intro.html)
+- [Building Great User Experiences with Concurrent Mode and Suspense](https://reactjs.org/blog/2019/11/06/building-great-user-experiences-with-concurrent-mode-and-suspense.html)
+- [Relay](https://relay.dev/docs/en/experimental/api-reference)
+  - FacebookがプロダクションでSuspenseと統合して使用しているライブラリ
+  - GraphQL
+  - [Practice Guide](https://relay.dev/docs/en/experimental/step-by-step)
